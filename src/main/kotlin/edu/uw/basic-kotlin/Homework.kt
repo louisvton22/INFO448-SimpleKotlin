@@ -10,8 +10,8 @@ class Library {
 // write a "whenFn" that takes an arg of type "Any" and returns a String
 fun whenFn(s: Any): String {
     when (s) {
-        "Hello" ->  return "World"
-        is String -> return "I don't understand"
+        "Hello" ->  return "world"
+        is String -> return "Say what?"
         0 -> return "zero"
         1 -> return "one"
         in 2..10 -> return "low number"
@@ -41,6 +41,28 @@ class Person(fn:String, ln:String, a:Int) {
     val debugString="[Person firstName:$firstName lastName:$lastName age:$age]"
 }
 // write a class "Money" with amount and currency, and define a convert() method and the "+" operator
-class Money() {
+class Money(amt:Int = 0, curr:String="USD") {
+    var currencies = listOf("USD", "GBP", "EUR", "CAN")
+    var amount: Int = if (amt < 0) throw IllegalArgumentException("Amount can't be less than 0") else amt
+    var currency: String = if (curr in currencies) curr else throw IllegalArgumentException("Currency not recognized")
+    var usConversionTable = hashMapOf(
+        "USD" to 1f,
+        "GBP" to 1/2f,
+        "EUR" to 3/2f,
+        "CAN" to 5/4f
+    )
+    fun convert(toCurrency: String): Money {
+        val value: Int
+        if (currency == "USD") {
+            value = (amount * usConversionTable[toCurrency]!!).toInt()
+        } else {
+            value = (amount / usConversionTable[currency]!! * usConversionTable[toCurrency]!!).toInt()
+        }
+        return Money(value,toCurrency)
+    }
 
-}
+    operator fun plus(other: Money): Money {
+        return Money(this.amount + other.convert(this.currency).amount, currency)
+    }
+
+    }
